@@ -1,0 +1,67 @@
+{
+  "VideoDescription": {
+    "ScalingBehavior": "DEFAULT",
+    "VideoPreprocessors": {
+      "DolbyVision": {
+        "Profile": "PROFILE_5",
+        "L6Mode": "PASSTHROUGH"
+      }
+    },
+    "TimecodeInsertion": "DISABLED",
+    "AntiAlias": "ENABLED",
+    "Sharpness": 50,
+    "Height": 2160,
+    "Width": 3840,
+    "CodecSettings": {
+      "Codec": "H_265",
+      "H265Settings": {
+        "InterlaceMode": "PROGRESSIVE",
+        "NumberReferenceFrames": 3,
+        "GopClosedCadence": 1,
+        "AlternateTransferFunctionSei": "DISABLED",
+        "GopSize": 48,
+        "Slices": 1,
+        "GopBReference": "DISABLED",
+        "Bitrate": 15000000,
+        "MaxBitrate": 15000000,
+        "HrdBufferSize": 15000000,
+        "SlowPal": "DISABLED",
+        "SpatialAdaptiveQuantization": "ENABLED",
+        "TemporalAdaptiveQuantization": "ENABLED",
+        "FlickerAdaptiveQuantization": "DISABLED",
+        "FramerateControl": "INITIALIZE_FROM_SOURCE",
+        "RateControlMode": "VBR",
+        "CodecProfile": "MAIN10_HIGH",
+        "Tiles": "ENABLED",
+        "Telecine": "NONE",
+        "MinIInterval": 0,
+        "AdaptiveQuantization": "HIGH",
+        "CodecLevel": "AUTO",
+        "SceneChangeDetect": "ENABLED",
+        "QualityTuningLevel": "SINGLE_PASS",
+        "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+        "UnregisteredSeiTimecode": "DISABLED",
+        "GopSizeUnits": "FRAMES",
+        "ParControl": "INITIALIZE_FROM_SOURCE",
+        "NumberBFramesBetweenReferenceFrames": 2,
+        "TemporalIds": "DISABLED",
+        "SampleAdaptiveOffsetFilterMode": "ADAPTIVE",
+        "WriteMp4PackagingType": "HVC1",
+        "DynamicSubGop": "STATIC"
+      }
+    },
+    "AfdSignaling": "NONE",
+    "DropFrameTimecode": "ENABLED",
+    "RespondToAfd": "NONE",
+    "ColorMetadata": "INSERT"
+  },
+  "ContainerSettings": {
+    "Container": "MP4",
+    "Mp4Settings": {
+      "CslgAtom": "INCLUDE",
+      "CttsVersion": 0,
+      "FreeSpaceBox": "EXCLUDE",
+      "MoovPlacement": "PROGRESSIVE_DOWNLOAD"
+    }
+  }
+}

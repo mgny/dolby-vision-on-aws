@@ -18,106 +18,26 @@ let PutNotification = async (config) => {
 
     let params;
 
-    switch (config.WorkflowTrigger) {
-        case 'VideoFile':
-            params = {
-                Bucket: config.Source,
-                NotificationConfiguration: {
-                    LambdaFunctionConfigurations: [
-                        {
-                            Events: ['s3:ObjectCreated:*'],
-                            LambdaFunctionArn: config.IngestArn,
-                            Filter: {
-                                Key: {
-                                    FilterRules: [{
-                                        Name: 'suffix',
-                                        Value: '.mpg'
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            Events: ['s3:ObjectCreated:*'],
-                            LambdaFunctionArn: config.IngestArn,
-                            Filter: {
-                                Key: {
-                                    FilterRules: [{
-                                        Name: 'suffix',
-                                        Value: '.mp4'
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            Events: ['s3:ObjectCreated:*'],
-                            LambdaFunctionArn: config.IngestArn,
-                            Filter: {
-                                Key: {
-                                    FilterRules: [{
-                                        Name: 'suffix',
-                                        Value: '.m4v'
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            Events: ['s3:ObjectCreated:*'],
-                            LambdaFunctionArn: config.IngestArn,
-                            Filter: {
-                                Key: {
-                                    FilterRules: [{
-                                        Name: 'suffix',
-                                        Value: '.mov'
-                                    }]
-                                }
-                            }
-                        },
-                        {
-                            Events: ['s3:ObjectCreated:*'],
-                            LambdaFunctionArn: config.IngestArn,
-                            Filter: {
-                                Key: {
-                                    FilterRules: [{
-                                        Name: 'suffix',
-                                        Value: '.m2ts'
-                                    }]
-                                }
-                            }
-                        }
-                    ]
+    params = {
+        Bucket: config.Source,
+        NotificationConfiguration: {
+            LambdaFunctionConfigurations: [{
+                Events: ['s3:ObjectCreated:*'],
+                LambdaFunctionArn: config.IngestArn,
+                Filter: {
+                    Key: {
+                        FilterRules: [{
+                            Name: 'suffix',
+                            Value: 'json'
+                        }]
+                    }
                 }
-            };
+            }]
+        }
+    };
 
-            console.log(`Configuring S3 event for ${config.WorkflowTrigger}`);
-            await s3.putBucketNotificationConfiguration(params).promise();
-            break;
-
-        case 'MetadataFile':
-            params = {
-                Bucket: config.Source,
-                NotificationConfiguration: {
-                    LambdaFunctionConfigurations: [{
-                        Events: ['s3:ObjectCreated:*'],
-                        LambdaFunctionArn: config.IngestArn,
-                        Filter: {
-                            Key: {
-                                FilterRules: [{
-                                    Name: 'suffix',
-                                    Value: 'json'
-                                }]
-                            }
-                        }
-                    }]
-                }
-            };
-
-            console.log(`Configuring S3 event for ${config.WorkflowTrigger}`);
-            await s3.putBucketNotificationConfiguration(params).promise();
-            break;
-
-        default:
-            throw new Error(`Unknown WorkflowTrigger: ${config.WorkflowTrigger}`);
-    }
+    console.log(`Configuring S3 event for MetadataFile`);
+    await s3.putBucketNotificationConfiguration(params).promise();
 
     return 'success';
 };

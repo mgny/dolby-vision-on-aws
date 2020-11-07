@@ -1,7 +1,6 @@
-# Video on Demand on AWS
+# Dolby Vision on AWS
 
-How to implement a video-on-demand workflow on AWS leveraging AWS Step Functions, AWS Elemental MediaConvert, and AWS Elemental MediaPackage.
-Source code for [Video on Demand on AWS](https://aws.amazon.com/solutions/video-on-demand-on-aws/) solution.
+How to implement a dolby-vision workflow on AWS leveraging AWS Step Functions, AWS Elemental MediaConvert, and AWS Elemental MediaPackage.
 
 ## On this Page
 - [Architecture Overview](#architecture-overview)
@@ -9,7 +8,6 @@ Source code for [Video on Demand on AWS](https://aws.amazon.com/solutions/video-
 - [Workflow Configuration](#workflow-configuration)
 - [Source Metadata Option](#source-metadata-option)
 - [Encoding Templates](#encoding-templates)
-- [QVBR Mode](#qvbr-mode)
 - [Accelerated Transcoding](#accelerated-transcoding)
 - [Source Code](#source-code)
 - [Creating a custom Build](#creating-a-custom-build)
@@ -19,7 +17,7 @@ Source code for [Video on Demand on AWS](https://aws.amazon.com/solutions/video-
 ![Architecture](architecture.png)
 
 ## Deployment
-The solution is deployed using a CloudFormation template with a lambda backed custom resource. For details on deploying the solution please see the details on the solution home page: [Video on Demand on AWS](https://aws.amazon.com/answers/media-entertainment/video-on-demand-on-aws/)
+The solution is deployed using a CloudFormation template with a lambda backed custom resource.
 
 > **Please ensure you test the new template before updating any production deployments.**
 
@@ -27,103 +25,85 @@ The solution is deployed using a CloudFormation template with a lambda backed cu
 The workflow configuration is set at deployment and is defined as environment variables for the input-validate lambda function (which is the first step in the ingest process).
 
 #### Environment Variables:
-* **Archive Source:**	If enabled, the source video file will be tagged for archiving to glacier at the end of the workflow
 * **CloudFront:**	CloudFront domain name, used to generate the playback URLs for the MediaConvert outputs
 * **Destination:**	The name of the destination S3 bucket for all of the MediaConvert outputs
-* **FrameCapture:**	If enabled frame capture is added to the job submitted to MediaConvert
-* **InputRotate:**	Defines how the MediaConvert rotates your video
-* **MediaConvert_Template_2160p:**	The name of the UHD template in MediaConvert
-* **MediaConvert_Template_1080p:**	The name of the HD template in MediaConvert
-* **MediaConvert_Template_720p:**	The name of the SD template in MediaConvert
 * **Source:**	The name of the source S3 bucket
+* **JobsBucket:**   The name of the S3 bucket for input job metadata files
+* **Templates:**   The name of the S3 bucket for custom encoding templates
 * **WorkflowName:**	Used to tag all of the MediaConvert encoding jobs
-* **acceleratedTranscoding** Enabled Accelerated Transocding in MediaConvert. options include ENABLE, DISABLE, PREFERRED. for more detials please see: 
-* **enableSns** Send SNS notifications for the workflow results.
-* **enableSqs** Send the workflow results to an SQS queue
+* **AcceleratedTranscoding** Enabled Accelerated Transocding in MediaConvert. options include ENABLE, DISABLE, PREFERRED. for more detials please see: 
+* **EnableSns** Send SNS notifications for the workflow results.
+* **EnableSqs** Send the workflow results to an SQS queue
 
 ### WorkFlow Triggers
 
-#### Source Video Option
-If deployed with the workflow trigger parameter set to VideoFile, the CloudFormation template will configure S3 event notifications on the source S3 bucket to trigger the workflow whenever a video file (mpg, mp4, m4v, mov, or m2ts) is uploaded.
+#### Source Metadata
+The stack is deployed with the workflow trigger parameter set to MetadataFile; therefore the S3 notification is configured to trigger the workflow whenever a JSON file is uploaded. This allows different workflow configuration to be defined for each source video processed by the workflow.
 
-#### Source Metadata Option
-If deployed with the workflow trigger parameter set to MetadataFile, the S3 notification is configured to trigger the workflow whenever a JSON file is uploaded. This allows different workflow configuration to be defined for each source video processed by the workflow.
+> **Important:** The source video file and/or custom templates must be uploaded to S3 before the metadata file is uploaded, and the metadata file must be valid JSON with a .json file extension.
 
-> **Important:** The source video file must be uploaded to S3 before the metadata file is uploaded, and the metadata file must be valid JSON with a .json file extension. With source metadata enabled uploading video files to Amazon S3 will not trigger the workflow.
-
-**Example JSON metadata file:**
+**Example JSON job metadata file (with default template):**
 ```
 {
-    "srcVideo": "example.mpg",
-    "archiveSource": true,
-    "frameCapture": false,
-    "jobTemplate": "custom-job-template"
+    "srcVideo": "SolLevante_IMF_DolbyVision_PQP3D65_UHD_24fps/VIDEO_e4da5fcd-5ffc-4713-bcdd-95ea579d790b.mxf",
+    "jobTemplate": {
+        "type": "default",
+        "name": "dolby-vision-on-aws-default-template-cmaf-dvp5-24fps"
+    }
 }
 ```
 
-The only required field for the metadata file is the **srcVideo**. The workflow will default to the environment variables settings for the ingest validate lambda function for any settings not defined in the metadata file.
+**Example JSON job metadata file (with custom template):**
+```
+{
+    "srcVideo": "SolLevante_IMF_DolbyVision_PQP3D65_UHD_24fps/VIDEO_e4da5fcd-5ffc-4713-bcdd-95ea579d790b.mxf",
+    "jobTemplate": {
+        "type": "custom",
+        "name": "custom-job-24fps-mp4_2160p_1080p-full-template.json"
+    }
+}
+```
+
+Required fields for the metadata file are **srcVideo**, **jobTemplate**, **name** and **type**. The workflow will default to the environment variables settings for the ingest validate lambda function for any settings not defined in the metadata file.
 
 **Full list of options:**
 ```
 {
     "srcVideo": "string",
-    "archiveSource": string,
-    "frameCapture": boolean,
     "srcBucket": "string",
     "destBucket": "string",
-    "cloudFront": "string",
-    "jobTemplate_2160p": "string",
-    "jobTemplate_1080p": "string",
-    "jobTemplate_720p": "string",
-    "jobTemplate": "custom-job-template",
-    "inputRotate": "DEGREE_0|DEGREES_90|DEGREES_180|DEGREES_270|AUTO",
-    "captions": {
-        "srcFile": "string",
-        "fontSize": integer,
-        "fontColor": "WHITE|BLACK|YELLOW|RED|GREEN|BLUE"
-    }
+    "cloudFront": "string"
 }
 ```
+
+> **Sample job metadata files are found in the test folder.** 
 
 The solution also supports adding additional metadata, such as title, genre, or any other information, you want to store in Amazon DynamoDB.
 
 ## Encoding Templates
-At launch the Solution creates 3 MediaConvert job templates which are used as the default encoding templates for the workflow:
-- **MediaConvert_Template_2160p**
-- **MediaConvert_Template_1080p**
-- **MediaConvert_Template_720p**
+At launch the Solution creates 10 MediaConvert job templates which are used as the default encoding templates for the workflow:
+- **default-template-cmaf-dvp5-24fps**
+- **default-template-cmaf-dvp5-25fps**
+- **default-template-cmaf-dvp5-30fps**
+- **default-template-cmaf-dvp5-50fps**
+- **default-template-cmaf-dvp5-60fps**
+- **default-template-mp4-dvp5-24fps**
+- **default-template-mp4-dvp5-25fps**
+- **default-template-mp4-dvp5-30fps**
+- **default-template-mp4-dvp5-50fps**
+- **default-template-mp4-dvp5-60fps**
 
-By default, the profiler step in the process step function will check the source video height and set the parameter "jobTemplate" to one of the available templates. This variable is then passed to the encoding step which submits a job to Elemental MediaConvert. To customize the encoding templates used by the solution you can either replace the existing templates or you can use the source metadata version of the workflow and define the jobTemplate as part of the source metadata file.
+Custom encoding templates can be also created by the user and located in the S3 bucket "Templates".
 
-**To replace the templates:**
-1.	Use the system templates or create 3 new templates through the MediaConvert console (see the Elemental MediaConvert documentation for details).
-2.	Update the environment variables for the input validate lambda function with the names of the new templates.
+The type and name of the template to be used are specified in the job metadata file by the user. If custom encoding template is chosen, it checks the S3 bucket for Templates, gets the user-given encoding template json, then submits a job to Elemental MediaConvert. If default template is chosen, the job is submitted with one of the default encoding templates described above.
 
-**To define the job template using metadata:**
-1.	Launch the solution with source metadata parameter. See Appendix E for more details.
-2.	Use the system templates or create a new template through the MediaConvert console (see the Elemental MediaConvert documentation for details).
-3.	Add "jobTemplate":"name of the template" to the metadata file, this will overwrite the profiler step in the process Step Functions.
 
-## QVBR Mode
-AWS MediaConvert Quality-defined Variable Bit-Rate (QVBR) control mode gets the best video quality for a given file size and is recommended for OTT and Video On Demand Content. The solution supports this feature and it will create HLS, MP4 and DASH custom presets with the following QVBR levels and Single Pass HQ encoding:
-
-| Resolution   |      MaxBitrate      |  QvbrQualityLevel |
-|----------|:-------------:|------:|
-| 2160p |  20000kbps | 8 |
-| 1080p |  8500Kbps  | 8 |
-| 720p  |  6500Kbps  | 8 |
-| 720p  |  5000Kbps  | 8 |
-| 720p  |  3500Kbps  | 7 |
-| 540p  |  6500Kbps  | 7 |
-| 540p  |  3500Kbps  | 7 |
-| 360p  |  1200Kbps  | 7 |
-| 360p  |  600Kbps   | 7 |
-| 270p  |  400Kbps   | 7 |
-
-For more detail please see [QVBR and MediaConvert](https://docs.aws.amazon.com/mediaconvert/latest/ug/cbr-vbr-qvbr.html).
+> **Sample custom encoding templates are found in the test folder.** 
 
 ## Accelerated Transcoding 
-Version 5.1.0 introduces support for accelerated transcoding which is a pro tier  feature of AWS Elemental MediaConvert. This feature can be configured when launching the template with one of the following options:
+(This option is not tested with Dolby Vision encoding job. Therefore, it is set to DISABLED by default.)
+
+Version 5.1.0 introduces support for accelerated transcoding which is a pro tier feature of AWS Elemental MediaConvert. This feature can be configured when launching the template with one of the following options:
 
 * **ENABLED** All files upload will have acceleration enabled. Files that are not supported will not be processed and the workflow will fail
 * **PREFERRED** All files uploaded will be processed but only supported files will have acceleration enabled, the workflow will not fail.
@@ -177,19 +157,19 @@ aws s3 mb s3://my-bucket-us-east-1
 Build the distributable:
 ```
 chmod +x ./build-s3-dist.sh
-./build-s3-dist.sh my-bucket video-on-demand-on-aws version
+./build-s3-dist.sh my-bucket dolby-vision-on-aws version
 ```
 
 > **Notes**: The _build-s3-dist_ script expects the bucket name as one of its parameters, and this value should not include the region suffix.
 
 Deploy the distributable to the Amazon S3 bucket in your account:
 ```
-aws s3 cp ./regional-s3-assets/ s3://my-bucket-us-east-1/video-on-demand-on-aws/version/ --recursive --acl bucket-owner-full-control
+aws s3 cp ./regional-s3-assets/ s3://my-bucket-us-east-1/dolby-vision-on-aws/version/ --recursive --acl bucket-owner-full-control
 ```
 
 ### 4. Launch the CloudFormation template.
-* Get the link of the video-on-demand-on-aws.template uploaded to your Amazon S3 bucket.
-* Deploy the Video on Demand to your account by launching a new AWS CloudFormation stack using the link of the video-on-demand-on-aws.template.
+* Get the link of the dolby-vision-on-aws.template uploaded to your Amazon S3 bucket.
+* Deploy the Video on Demand to your account by launching a new AWS CloudFormation stack using the link of the dolby-vision-on-aws.template.
 
 ## Additional Resources
 

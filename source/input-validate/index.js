@@ -32,52 +32,51 @@ exports.handler = async (event) => {
             workflowName: process.env.WorkflowName,
             srcBucket: process.env.Source,
             destBucket: process.env.Destination,
+            jobsBucket: process.env.JobsBucket,
+            tmplBucket: process.env.Templates,
             cloudFront: process.env.CloudFront,
-            frameCapture: JSON.parse(process.env.FrameCapture),
-            archiveSource:  process.env.ArchiveSource,
-            jobTemplate_2160p: process.env.MediaConvert_Template_2160p,
-            jobTemplate_1080p: process.env.MediaConvert_Template_1080p,
-            jobTemplate_720p: process.env.MediaConvert_Template_720p,
-            inputRotate: process.env.InputRotate,
             acceleratedTranscoding: process.env.AcceleratedTranscoding,
             enableSns:JSON.parse(process.env.EnableSns),
-            enableSqs:JSON.parse(process.env.EnableSqs)
+            enableSqs:JSON.parse(process.env.EnableSqs),
+            jobTemplate: {}
         };
 
-        switch (event.workflowTrigger) {
-            case 'Metadata':
-                console.log('Validating Metadata file::');
+        console.log('Validating Metadata file::');
 
-                const key = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
-                data.srcMetadataFile = key;
+        console.log(`input-validate DATA:: ${JSON.stringify(data, null, 2)}`);
 
-                // Download json metadata file from s3
-                const metadata = await s3.getObject({ Bucket: data.srcBucket, Key: key }).promise();
+        const key = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
+        data.srcMetadataFile = key;
 
-                const metadataFile = JSON.parse(metadata.Body);
-                if (!metadataFile.srcVideo) {
-                    throw new Error('srcVideo is not defined in metadata::', metadataFile);
-                }
+        // Download json metadata file from s3
+        const metadata = await s3.getObject({ Bucket: data.jobsBucket, Key: key }).promise();
+        // parse metadata file
+        const metadataFile = JSON.parse(metadata.Body);
 
-                // https://github.com/awslabs/video-on-demand-on-aws/pull/23
-                // Normalize key in order to support different casing
-                Object.keys(metadataFile).forEach((key) => {
-                    const normalizedKey = key.charAt(0).toLowerCase() + key.substr(1);
-                    data[normalizedKey] = metadataFile[key];
-                });
-
-                // Check source file is accessible in s3
-                await s3.headObject({ Bucket: data.srcBucket, Key: data.srcVideo }).promise();
-
-                break;
-
-            case 'Video':
-                data.srcVideo = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
-                break;
-
-            default:
-                throw new Error('event.workflowTrigger is not defined.');
+        if (!metadataFile.srcVideo) {
+            throw new Error('srcVideo is not defined in metadata::', metadataFile);
         }
+
+        if (!metadataFile.jobTemplate) {
+            throw new Error('jobTemplate is not defined in metadata::', metadataFile);
+        }
+
+        if (!metadataFile.jobTemplate.type) {
+            throw new Error('jobTemplate type is not defined in metadata::', metadataFile);
+        }
+        
+
+        // https://github.com/awslabs/video-on-demand-on-aws/pull/23
+        // Normalize key in order to support different casing
+        Object.keys(metadataFile).forEach((key) => {
+            const normalizedKey = key.charAt(0).toLowerCase() + key.substr(1);
+            data[normalizedKey] = metadataFile[key];
+        });
+
+
+        // Check source file is accessible in s3
+        await s3.headObject({ Bucket: data.srcBucket, Key: data.srcVideo }).promise();
+
 
         // The MediaPackage setting is configured at the stack level, and it cannot be updated via metadata.
         data['enableMediaPackage'] = JSON.parse(process.env.EnableMediaPackage);

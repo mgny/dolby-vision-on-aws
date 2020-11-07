@@ -15,99 +15,131 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 
 const CATEGORY = 'VOD';
-const DESCRIPTION = 'video on demand on aws';
+const DESCRIPTION = 'dolby vision on aws';
 
-const qvbrPresets = [
+const defaultPresets = [
     {
-        name: '_Mp4_Avc_Aac_16x9_1280x720p_24Hz_4.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Mp4_Avc_Aac_16x9_1280x720p_24Hz_4.5Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-24fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-24fps-2160p-15mbps.json'
     },
     {
-        name: '_Mp4_Avc_Aac_16x9_1920x1080p_24Hz_6Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Mp4_Avc_Aac_16x9_1920x1080p_24Hz_6Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-24fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-24fps-1080p-8mbps.json'
     },
     {
-        name: '_Mp4_Hevc_Aac_16x9_3840x2160p_24Hz_20Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Mp4_Hevc_Aac_16x9_3840x2160p_24Hz_20Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-25fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-25fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_1280x720p_30Hz_6.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_1280x720p_30Hz_6.5Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-25fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-25fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_480x270p_15Hz_0.4Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_480x270p_15Hz_0.4Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-30fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-30fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_1920x1080p_30Hz_8.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_1920x1080p_30Hz_8.5Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-30fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-30fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_640x360p_30Hz_0.6Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_640x360p_30Hz_0.6Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-50fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-50fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_1280x720p_30Hz_3.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_1280x720p_30Hz_3.5Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-50fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-50fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_640x360p_30Hz_1.2Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_640x360p_30Hz_1.2Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-60fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-60fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_1280x720p_30Hz_5.0Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_1280x720p_30Hz_5.0Mbps_qvbr.json'
+        name: '-default-preset-mp4-dvp5-video-60fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-mp4-dvp5-video-60fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Dash_Mp4_Avc_16x9_960x540p_30Hz_3.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Dash_Mp4_Avc_16x9_960x540p_30Hz_3.5Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-24fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-24fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_3.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_3.5Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-24fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-24fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_480x270p_15Hz_0.4Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_480x270p_15Hz_0.4Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-25fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-25fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_5.0Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_5.0Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-25fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-25fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_640x360p_30Hz_0.6Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_640x360p_30Hz_0.6Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-30fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-30fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_6.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_6.5Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-30fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-30fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_640x360p_30Hz_1.2Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_640x360p_30Hz_1.2Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-50fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-50fps-2160p-15mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_1920x1080p_30Hz_8.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_1920x1080p_30Hz_8.5Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-50fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-50fps-1080p-8mbps.json'
     },
     {
-        name: '_Ott_Hls_Ts_Avc_Aac_16x9_960x540p_30Hz_3.5Mbps_qvbr',
-        file: './lib/mediaconvert/presets/_Ott_Hls_Ts_Avc_Aac_16x9_960x540p_30Hz_3.5Mbps_qvbr.json'
+        name: '-default-preset-cmaf-dvp5-video-60fps-2160p-15mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-60fps-2160p-15mbps.json'
+    },
+    {
+        name: '-default-preset-cmaf-dvp5-video-60fps-1080p-8mbps',
+        file: './lib/mediaconvert/presets/default-preset-cmaf-dvp5-video-60fps-1080p-8mbps.json'
     }
 ];
 
-const qvbrTemplates = [
+const defaultTemplates = [
     {
-        name: '_Ott_2160p_Avc_Aac_16x9_qvbr',
-        file: './lib/mediaconvert/templates/2160p_avc_aac_16x9_qvbr.json'
+        name: '-default-template-mp4-dvp5-24fps',
+        file: './lib/mediaconvert/templates/default-template-mp4-dvp5-24fps.json'
     },
     {
-        name: '_Ott_1080p_Avc_Aac_16x9_qvbr',
-        file: './lib/mediaconvert/templates/1080p_avc_aac_16x9_qvbr.json'
+        name: '-default-template-cmaf-dvp5-24fps',
+        file: './lib/mediaconvert/templates/default-template-cmaf-dvp5-24fps.json'
     },
     {
-        name: '_Ott_720p_Avc_Aac_16x9_qvbr',
-        file: './lib/mediaconvert/templates/720p_avc_aac_16x9_qvbr.json'
+        name: '-default-template-mp4-dvp5-25fps',
+        file: './lib/mediaconvert/templates/default-template-mp4-dvp5-25fps.json'
+    },
+    {
+        name: '-default-template-cmaf-dvp5-25fps',
+        file: './lib/mediaconvert/templates/default-template-cmaf-dvp5-25fps.json'
+    },
+    {
+        name: '-default-template-mp4-dvp5-30fps',
+        file: './lib/mediaconvert/templates/default-template-mp4-dvp5-30fps.json'
+    },
+    {
+        name: '-default-template-cmaf-dvp5-30fps',
+        file: './lib/mediaconvert/templates/default-template-cmaf-dvp5-30fps.json'
+    },
+    {
+        name: '-default-template-mp4-dvp5-50fps',
+        file: './lib/mediaconvert/templates/default-template-mp4-dvp5-50fps.json'
+    },
+    {
+        name: '-default-template-cmaf-dvp5-50fps',
+        file: './lib/mediaconvert/templates/default-template-cmaf-dvp5-50fps.json'
+    },
+    {
+        name: '-default-template-mp4-dvp5-60fps',
+        file: './lib/mediaconvert/templates/default-template-mp4-dvp5-60fps.json'
+    },
+    {
+        name: '-default-template-cmaf-dvp5-60fps',
+        file: './lib/mediaconvert/templates/default-template-cmaf-dvp5-60fps.json'
     }
 ];
 
@@ -182,13 +214,13 @@ const Create = async (config) => {
     let templates = [];
 
     if (config.EnableMediaPackage === 'true') {
-        // Use qvbr presets but Media Package templates
-        presets = qvbrPresets;
+        // Use default presets but Media Package templates
+        presets = defaultPresets;
         templates = mediaPackageTemplates;
     } else {
-        // Use qvbr presets and templates
-        presets = qvbrPresets;
-        templates = qvbrTemplates;
+        // Use default presets and templates
+        presets = defaultPresets;
+        templates = defaultTemplates;
     }
 
     await _createPresets(mediaconvert, presets, config.StackName);
@@ -215,13 +247,13 @@ const Update = async (config) => {
 
     if (config.EnableMediaPackage != enableMediaPackage) {
         if (config.EnableMediaPackage == 'true') {
-            console.log('Deleting qvbr templates and creating MediaPackage templates');
-            await _deleteTemplates(mediaconvert, qvbrTemplates, config.StackName);
+            console.log('Deleting default templates and creating MediaPackage templates');
+            await _deleteTemplates(mediaconvert, defaultTemplates, config.StackName);
             await _createTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
         } else {
-            console.log('Deleting MediaPackage templates and creating qvbr templates');
+            console.log('Deleting MediaPackage templates and creating default templates');
             await _deleteTemplates(mediaconvert, mediaPackageTemplates, config.StackName);
-            await _createTemplates(mediaconvert, qvbrTemplates, config.StackName);
+            await _createTemplates(mediaconvert, defaultTemplates, config.StackName);
         }
     } else {
         console.log('No changes to the MediaConvert templates');
@@ -259,13 +291,13 @@ const Delete = async (config) => {
         let templates = [];
 
         if (config.EnableMediaPackage === 'true') {
-            // Use qvbr presets but Media Package templates
-            presets = qvbrPresets;
+            // Use default presets but Media Package templates
+            presets = defaultPresets;
             templates = mediaPackageTemplates;
         } else {
-            // Use qvbr presets and templates
-            presets = qvbrPresets;
-            templates = qvbrTemplates;
+            // Use default presets and templates
+            presets = defaultPresets;
+            templates = defaultTemplates;
         }
 
         await _deletePresets(mediaconvert, presets, config.StackName);

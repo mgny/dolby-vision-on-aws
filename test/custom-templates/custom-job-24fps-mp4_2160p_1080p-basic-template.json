@@ -1,0 +1,58 @@
+{
+    "JobTemplate": {
+        "Settings": {
+            "OutputGroups": [
+                {
+                    "Name": "File Group",
+                    "OutputGroupSettings": {
+                        "Type": "FILE_GROUP_SETTINGS",
+                        "FileGroupSettings": {
+                        }
+                    },
+                    "Outputs": [
+                        {
+                            "NameModifier": "_dvp5_24fps_2160p_12mbps",
+                            "VideoDescription": {
+                                "Width": 3840,
+                                "Height": 2160,
+                                "CodecSettings": {
+                                    "H265Settings": {
+                                        "QualityTuningLevel": "SINGLE_PASS",
+                                        "RateControlMode": "VBR",
+                                        "Bitrate": 12000000,
+                                        "MaxBitrate": 12000000,
+                                        "HrdBufferSize": 12000000,
+                                        "GopSizeUnits": "FRAMES",
+                                        "GopSize": 48,
+                                        "MinIInterval": 0,
+                                        "SceneChangeDetect": "ENABLED"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "NameModifier": "_dvp5_24fps_1080p_6mbps",
+                            "VideoDescription": {
+                                "Width": 1920,
+                                "Height": 1080,
+                                "CodecSettings": {
+                                    "H265Settings": {
+                                        "QualityTuningLevel": "SINGLE_PASS",
+                                        "RateControlMode": "VBR",
+                                        "Bitrate": 6000000,
+                                        "MaxBitrate": 6000000,
+                                        "HrdBufferSize": 6000000,
+                                        "GopSizeUnits": "FRAMES",
+                                        "GopSize": 48,
+                                        "MinIInterval": 0,
+                                        "SceneChangeDetect": "ENABLED"
+                                    }
+                                }
+                            }
+                        }
+                    ]    
+                }
+            ]
+        }
+    }
+}

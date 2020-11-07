@@ -1,0 +1,47 @@
+{
+  "Category": "VOD",
+  "Description": "cmaf job template for dolby vision on aws",
+  "Name": "-default-template-cmaf-dvp5-30fps",
+  "Settings": {
+    "OutputGroups": [
+      {
+        "Name": "CMAF",
+        "OutputGroupSettings": {
+          "Type": "CMAF_GROUP_SETTINGS",
+          "CmafGroupSettings": {
+            "WriteHlsManifest": "ENABLED",
+            "WriteDashManifest": "ENABLED",
+            "SegmentLength": 10,
+            "MinFinalSegmentLength": 0,
+            "FragmentLength": 2,
+            "SegmentControl": "SINGLE_FILE",
+            "MpdProfile": "MAIN_PROFILE",
+            "WriteSegmentTimelineInRepresentation": "DISABLED",
+            "ManifestDurationFormat": "INTEGER",
+            "StreamInfResolution": "INCLUDE",
+            "ClientCache": "ENABLED",
+            "ManifestCompression": "NONE",
+            "CodecSpecification": "RFC_4281"
+          }
+        },
+        "Outputs": [
+          {
+            "Preset": "-default-preset-cmaf-dvp5-video-30fps-2160p-15mbps",
+            "NameModifier": "_dvp5_30fps_2160p_15mbps"
+          },
+          {
+            "Preset": "-default-preset-cmaf-dvp5-video-30fps-1080p-8mbps",
+            "NameModifier": "_dvp5_30fps_1080p_8mbps"
+          }
+        ]
+      }
+    ],
+    "AdAvailOffset": 0
+  },
+  "AccelerationSettings": {
+    "Mode": "DISABLED"
+  },
+  "StatusUpdateInterval": "SECONDS_60",
+  "Priority": 0,
+  "HopDestinations": []
+}

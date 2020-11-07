@@ -42,22 +42,22 @@ mkdir -p $build_dist_dir
 echo "------------------------------------------------------------------------------"
 echo "CloudFormation Template"
 echo "------------------------------------------------------------------------------"
-cp $template_dir/video-on-demand-on-aws.yaml $template_dist_dir/video-on-demand-on-aws.template
+cp $template_dir/dolby-vision-on-aws.yaml $template_dist_dir/dolby-vision-on-aws.template
 
 replace="s/%%BUCKET_NAME%%/$1/g"
 echo "sed -i -e $replace"
-sed -i -e $replace $template_dist_dir/video-on-demand-on-aws.template
+sed -i -e $replace $template_dist_dir/dolby-vision-on-aws.template
 
 replace="s/%%SOLUTION_NAME%%/$2/g"
 echo "sed -i -e $replace"
-sed -i -e $replace $template_dist_dir/video-on-demand-on-aws.template
+sed -i -e $replace $template_dist_dir/dolby-vision-on-aws.template
 
 replace="s/%%VERSION%%/$3/g"
 echo "sed -i -e $replace"
-sed -i -e $replace $template_dist_dir/video-on-demand-on-aws.template
+sed -i -e $replace $template_dist_dir/dolby-vision-on-aws.template
 sed -i -e $replace $template_dir/../README.md
 
-cp $template_dist_dir/video-on-demand-on-aws.template $build_dist_dir/
+cp $template_dist_dir/dolby-vision-on-aws.template $build_dist_dir/
 
 echo "------------------------------------------------------------------------------"
 echo "Lambda Functions"

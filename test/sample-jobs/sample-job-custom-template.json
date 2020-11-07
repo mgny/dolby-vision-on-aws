@@ -1,0 +1,7 @@
+{
+    "srcVideo": "ArtGlass_3840x2160_24fps_4000nits_P3D65_200p_md402.mxf",
+    "jobTemplate": {
+    	"type": "custom",
+    	"name": "custom-job-24fps-cmaf_2160p_1080p-mp4_2160p_1080p-full-template.json"
+	}
+}

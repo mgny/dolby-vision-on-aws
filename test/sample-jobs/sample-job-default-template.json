@@ -1,0 +1,7 @@
+{
+    "srcVideo": "ArtGlass_3840x2160_24fps_4000nits_P3D65_200p_md402.mxf",
+    "jobTemplate": {
+    	"type": "default",
+    	"name": "dolby-vision-on-aws-default-template-cmaf-dvp5-24fps"
+	}
+}

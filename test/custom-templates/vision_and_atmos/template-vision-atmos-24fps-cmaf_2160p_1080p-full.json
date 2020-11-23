@@ -1,0 +1,144 @@
+{
+    "JobTemplate": {
+        "Settings": {
+            "OutputGroups": [
+                {
+                    "Name": "CMAF",
+                    "OutputGroupSettings": {
+                        "Type": "CMAF_GROUP_SETTINGS",
+                        "CmafGroupSettings": {
+                            "FragmentLength": 2,
+                            "SegmentLength": 10,
+                            "SegmentControl": "SINGLE_FILE",
+                            "WriteDashManifest": "ENABLED",
+                            "WriteHlsManifest": "ENABLED",
+                            "MpdProfile": "MAIN_PROFILE",
+                            "ClientCache": "ENABLED",
+                            "CodecSpecification": "RFC_4281",
+                            "ManifestCompression": "NONE",
+                            "ManifestDurationFormat": "INTEGER",
+                            "MinFinalSegmentLength": 0,
+                            "StreamInfResolution": "INCLUDE",
+                            "WriteSegmentTimelineInRepresentation": "DISABLED"
+                        }
+                    },
+                    "Outputs": [
+                        {
+                            "NameModifier": "_vision_2160p_15mbps",
+                            "VideoDescription": {
+                                "Width": 3840,
+                                "Height": 2160,
+                                "CodecSettings": {
+                                    "H265Settings": {
+                                        "QualityTuningLevel": "SINGLE_PASS",
+                                        "RateControlMode": "VBR",
+                                        "Bitrate": 15000000,
+                                        "MaxBitrate": 15000000,
+                                        "HrdBufferSize": 15000000,
+                                        "GopSizeUnits": "FRAMES",
+                                        "GopSize": 48,
+                                        "MinIInterval": 0,
+                                        "SceneChangeDetect": "ENABLED",
+                                        "CodecLevel": "AUTO",
+                                        "CodecProfile": "MAIN10_MAIN",
+                                        "WriteMp4PackagingType": "HVC1",
+                                        "AdaptiveQuantization": "HIGH",
+                                        "NumberBFramesBetweenReferenceFrames": 2,
+                                        "NumberReferenceFrames": 3,
+                                        "AlternateTransferFunctionSei": "DISABLED",
+                                        "FlickerAdaptiveQuantization": "DISABLED",
+                                        "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                        "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+                                        "GopBReference": "DISABLED",
+                                        "GopClosedCadence": 1,
+                                        "InterlaceMode": "PROGRESSIVE",
+                                        "ParControl": "INITIALIZE_FROM_SOURCE",
+                                        "SampleAdaptiveOffsetFilterMode": "ADAPTIVE",
+                                        "Slices": 1,
+                                        "SlowPal": "DISABLED",
+                                        "SpatialAdaptiveQuantization": "ENABLED",
+                                        "Telecine": "NONE",
+                                        "TemporalAdaptiveQuantization": "ENABLED",
+                                        "TemporalIds": "DISABLED",
+                                        "Tiles": "ENABLED",
+                                        "UnregisteredSeiTimecode": "DISABLED"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "NameModifier": "_vision_1080p_8mbps",
+                            "VideoDescription": {
+                                "Width": 1920,
+                                "Height": 1080,
+                                "CodecSettings": {
+                                    "H265Settings": {
+                                        "QualityTuningLevel": "SINGLE_PASS",
+                                        "RateControlMode": "VBR",
+                                        "Bitrate": 8000000,
+                                        "MaxBitrate": 8000000,
+                                        "HrdBufferSize": 8000000,
+                                        "GopSizeUnits": "FRAMES",
+                                        "GopSize": 48,
+                                        "MinIInterval": 0,
+                                        "SceneChangeDetect": "ENABLED",
+                                        "CodecLevel": "AUTO",
+                                        "CodecProfile": "MAIN10_MAIN",
+                                        "WriteMp4PackagingType": "HVC1",
+                                        "AdaptiveQuantization": "HIGH",
+                                        "NumberBFramesBetweenReferenceFrames": 2,
+                                        "NumberReferenceFrames": 3,
+                                        "AlternateTransferFunctionSei": "DISABLED",
+                                        "FlickerAdaptiveQuantization": "DISABLED",
+                                        "FramerateControl": "INITIALIZE_FROM_SOURCE",
+                                        "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+                                        "GopBReference": "DISABLED",
+                                        "GopClosedCadence": 1,
+                                        "InterlaceMode": "PROGRESSIVE",
+                                        "ParControl": "INITIALIZE_FROM_SOURCE",
+                                        "SampleAdaptiveOffsetFilterMode": "ADAPTIVE",
+                                        "Slices": 1,
+                                        "SlowPal": "DISABLED",
+                                        "SpatialAdaptiveQuantization": "ENABLED",
+                                        "Telecine": "NONE",
+                                        "TemporalAdaptiveQuantization": "ENABLED",
+                                        "TemporalIds": "DISABLED",
+                                        "Tiles": "ENABLED",
+                                        "UnregisteredSeiTimecode": "DISABLED"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "NameModifier": "_atmos_audio",
+                            "AudioDescriptions": [
+                            {
+                                "AudioTypeControl": "FOLLOW_INPUT",
+                                "LanguageCodeControl": "FOLLOW_INPUT",
+                                "CodecSettings": {
+                                    "Eac3AtmosSettings": {
+                                        "SurroundExMode": "NOT_INDICATED",
+                                        "LoRoSurroundMixLevel": -1.5,
+                                        "LtRtSurroundMixLevel": -1.5,
+                                        "Bitrate": 384000,
+                                        "LtRtCenterMixLevel": -1.5,
+                                        "LoRoCenterMixLevel": -1.5,
+                                        "CodingMode": "CODING_MODE_9_1_6",
+                                        "BitstreamMode": "COMPLETE_MAIN",
+                                        "StereoDownmix": "DPL2",
+                                        "DynamicRangeCompressionRf": "FILM_STANDARD",
+                                        "SampleRate": 48000,
+                                        "DynamicRangeCompressionLine": "FILM_STANDARD",
+                                        "MeteringMode": "ITU_BS_1770_4",
+                                        "DialogueIntelligence": "DISABLED",
+                                        "SpeechThreshold": 20
+                                    }
+                                }
+                            }]
+                        }
+                    ]    
+                }
+            ]
+        }
+    }
+}

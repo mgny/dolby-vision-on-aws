@@ -1,0 +1,8 @@
+{
+    "srcVideo": "SolLevante_IMF_DolbyVision_PQP3D65_UHD_24fps/VIDEO_e4da5fcd-5ffc-4713-bcdd-95ea579d790b.mxf",
+    "srcExternalAudio": "sollevante_lp_v01_48k_24b_24_re-render_9.1.6/sollevante_lp_v01_DAMF_Nearfield_48k_24b_24_re-render.wav",
+    "jobTemplate": {
+    	"type": "custom",
+    	"name": "vision_and_atmos/template-vision-atmos-24fps-cmaf_2160p_1080p-mp4_2160p_1080p-full.json"
+	}
+}

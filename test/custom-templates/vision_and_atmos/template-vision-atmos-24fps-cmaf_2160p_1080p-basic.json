@@ -1,0 +1,77 @@
+{
+    "JobTemplate": {
+        "Settings": {
+            "OutputGroups": [
+                {
+                    "Name": "CMAF",
+                    "OutputGroupSettings": {
+                        "Type": "CMAF_GROUP_SETTINGS",
+                        "CmafGroupSettings": {
+                            "FragmentLength": 2,
+                            "SegmentLength": 10,
+                            "SegmentControl": "SINGLE_FILE",
+                            "WriteDashManifest": "ENABLED",
+                            "WriteHlsManifest": "ENABLED"
+                        }
+                    },
+                    "Outputs": [
+                        {
+                            "NameModifier": "_vision_2160p_15mbps",
+                            "VideoDescription": {
+                                "Width": 3840,
+                                "Height": 2160,
+                                "CodecSettings": {
+                                    "H265Settings": {
+                                        "QualityTuningLevel": "SINGLE_PASS",
+                                        "RateControlMode": "VBR",
+                                        "Bitrate": 15000000,
+                                        "MaxBitrate": 15000000,
+                                        "HrdBufferSize": 15000000,
+                                        "GopSizeUnits": "FRAMES",
+                                        "GopSize": 48,
+                                        "MinIInterval": 0,
+                                        "SceneChangeDetect": "ENABLED"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "NameModifier": "_vision_1080p_8mbps",
+                            "VideoDescription": {
+                                "Width": 1920,
+                                "Height": 1080,
+                                "CodecSettings": {
+                                    "H265Settings": {
+                                        "QualityTuningLevel": "SINGLE_PASS",
+                                        "RateControlMode": "VBR",
+                                        "Bitrate": 8000000,
+                                        "MaxBitrate": 8000000,
+                                        "HrdBufferSize": 8000000,
+                                        "GopSizeUnits": "FRAMES",
+                                        "GopSize": 48,
+                                        "MinIInterval": 0,
+                                        "SceneChangeDetect": "ENABLED"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "NameModifier": "_atmos_audio",
+                            "AudioDescriptions": [{
+                                "AudioTypeControl": "USE_CONFIGURED",
+                                "AudioType": 0,
+                                "LanguageCodeControl": "USE_CONFIGURED",
+                                "LanguageCode": "eng",
+                                "CodecSettings": {
+                                    "Eac3AtmosSettings": {
+                                        "CodingMode": "CODING_MODE_9_1_6"
+                                    }
+                                }
+                            }]
+                        }
+                    ]    
+                }
+            ]
+        }
+    }
+}

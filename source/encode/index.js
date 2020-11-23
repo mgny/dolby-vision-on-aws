@@ -87,6 +87,19 @@ const applySettingsIfNeeded = (isCustomTemplate, originalGroup, customGroup) => 
     return originalGroup;
 };
 
+const getBaseJobSettings = () => ({
+    Settings: {
+        Inputs: [{
+            FilterEnable: 'AUTO',
+            PsiControl: 'USE_PSI',
+            FilterStrength: 0,
+            DeblockFilter: 'DISABLED',
+            DenoiseFilter: 'DISABLED',
+            TimecodeSource: 'EMBEDDED'
+        }],
+        OutputGroups: []
+    }
+});
 
 const getBaseJobTemplate = () => ({
     JobTemplate: {
@@ -200,6 +213,35 @@ const getBaseVideoDescription = () => ({
 });
 
 
+const getBaseAudioDescriptions = () => ({
+    AudioDescriptions: [
+      {
+        AudioSourceName: 'Audio Selector 1',
+        AudioTypeControl: 'FOLLOW_INPUT',
+        LanguageCodeControl: 'FOLLOW_INPUT',
+        CodecSettings: {
+          Codec: 'EAC3_ATMOS',
+          Eac3AtmosSettings: {
+            Bitrate: 448000,
+            SurroundExMode: 'NOT_INDICATED',
+            LoRoSurroundMixLevel: -3,
+            LtRtSurroundMixLevel: -3,
+            LtRtCenterMixLevel: -3,
+            LoRoCenterMixLevel: -3,
+            BitstreamMode: 'COMPLETE_MAIN',
+            StereoDownmix: 'DPL2',
+            DynamicRangeCompressionRf: 'FILM_LIGHT',
+            DynamicRangeCompressionLine: 'FILM_LIGHT',
+            MeteringMode: 'ITU_BS_1770_4',
+            DialogueIntelligence: 'ENABLED',
+            SampleRate: 48000,
+            SpeechThreshold: 20
+          }
+        }
+      }
+    ]
+});
+
 const CmafGroupSettingsParams = [
     'FragmentLength',
     'SegmentLength',
@@ -210,6 +252,31 @@ const CmafGroupSettingsParams = [
 
 const OutputParams = [
     'NameModifier'
+];
+
+const AudioDescriptionsParams = [
+    'AudioTypeControl',
+    'AudioType',
+    'LanguageCodeControl',
+    'LanguageCode'
+];
+
+const Eac3AtmosSettingsParams = [
+    'SurroundExMode',
+    'LoRoSurroundMixLevel',
+    'LtRtSurroundMixLevel',
+    'Bitrate',
+    'LtRtCenterMixLevel',
+    'LoRoCenterMixLevel',
+    'CodingMode',
+    'BitstreamMode',
+    'StereoDownmix',
+    'DynamicRangeCompressionRf',
+    'SampleRate',
+    'DynamicRangeCompressionLine',
+    'MeteringMode',
+    'DialogueIntelligence',
+    'SpeechThreshold'
 ];
 
 const VideoDescriptionParams = [
@@ -253,6 +320,8 @@ const H265SettingsParams = [
 ];
 
 
+
+
 const setParams = (params, dst, src) => {
     params.forEach(function(param){
         if(src[param]) {
@@ -273,12 +342,25 @@ const getCustomTmpl  = (userTmpl) => {
             setParams(CmafGroupSettingsParams, tmp_OutputGroups.OutputGroupSettings.CmafGroupSettings, group.OutputGroupSettings.CmafGroupSettings);
 
             group.Outputs.forEach(output => {
-                let tmp_output = getBaseVideoDescription();
-                Object.assign(tmp_output, getBaseContainerSettings_cmaf());
 
-                setParams(OutputParams, tmp_output, output);
-                setParams(VideoDescriptionParams, tmp_output.VideoDescription, output.VideoDescription);
-                setParams(H265SettingsParams, tmp_output.VideoDescription.CodecSettings.H265Settings, output.VideoDescription.CodecSettings.H265Settings);
+                let tmp_output = getBaseContainerSettings_cmaf();
+
+                if(output.VideoDescription) {
+                    //VIDEO
+                    Object.assign(tmp_output, getBaseVideoDescription());
+                    setParams(OutputParams, tmp_output, output);
+
+                    setParams(VideoDescriptionParams, tmp_output.VideoDescription, output.VideoDescription);
+                    setParams(H265SettingsParams, tmp_output.VideoDescription.CodecSettings.H265Settings, output.VideoDescription.CodecSettings.H265Settings);
+                } 
+                else if (output.AudioDescriptions) {
+                    //AUDIO
+                    Object.assign(tmp_output, getBaseAudioDescriptions());
+                    setParams(OutputParams, tmp_output, output);
+
+                    setParams(AudioDescriptionsParams, tmp_output.AudioDescriptions[0], output.AudioDescriptions[0]);
+                    setParams(Eac3AtmosSettingsParams, tmp_output.AudioDescriptions[0].CodecSettings.Eac3AtmosSettings, output.AudioDescriptions[0].CodecSettings.Eac3AtmosSettings);
+                }
 
                 tmp_OutputGroups.Outputs.push(tmp_output);
             });
@@ -289,13 +371,21 @@ const getCustomTmpl  = (userTmpl) => {
             let tmp_OutputGroups = getBaseOutputGroups_mp4();
 
             group.Outputs.forEach(output => {
-                let tmp_output = getBaseVideoDescription();
-                Object.assign(tmp_output, getBaseContainerSettings_mp4());
+                let tmp_output = getBaseContainerSettings_mp4();
 
-                setParams(OutputParams, tmp_output, output);
-                setParams(VideoDescriptionParams, tmp_output.VideoDescription, output.VideoDescription);
-                setParams(H265SettingsParams, tmp_output.VideoDescription.CodecSettings.H265Settings, output.VideoDescription.CodecSettings.H265Settings);
-
+                if(output.VideoDescription) {
+                    //VIDEO
+                    Object.assign(tmp_output, getBaseVideoDescription());
+                    setParams(OutputParams, tmp_output, output);
+                    setParams(VideoDescriptionParams, tmp_output.VideoDescription, output.VideoDescription);
+                    setParams(H265SettingsParams, tmp_output.VideoDescription.CodecSettings.H265Settings, output.VideoDescription.CodecSettings.H265Settings);
+                } 
+                else if (output.AudioDescriptions) {
+                    //AUDIO
+                    Object.assign(tmp_output, getBaseAudioDescriptions());
+                    setParams(AudioDescriptionsParams, tmp_output.AudioDescriptions[0], output.AudioDescriptions);
+                    setParams(Eac3AtmosSettingsParams, tmp_output.AudioDescriptions[0].CodecSettings.Eac3AtmosSettings, output.AudioDescriptions[0].CodecSettings.Eac3AtmosSettings);
+                }
                 tmp_OutputGroups.Outputs.push(tmp_output);
             });
             tmp_JobTemplate.JobTemplate.Settings.OutputGroups.push(tmp_OutputGroups);
@@ -317,47 +407,45 @@ exports.handler = async (event) => {
 
     
     try {
-        const inputPath = `s3://${event.srcBucket}/${event.srcVideo}`;
         const outputPath = `s3://${event.destBucket}/${event.guid}`;
         
-        let job;
         let tmpl;
-        var isCustomTemplate = false; 
+        var isCustomTemplate = false;
 
-        job = {
-            Role: process.env.MediaConvertRole,
-            UserMetadata: {
-                guid: event.guid,
-                workflow: event.workflowName
-            },
-            Settings: {
-                Inputs: [{
-                    AudioSelectors: {
-                        'Audio Selector 1': {
-                            Offset: 0,
-                            DefaultSelection: 'DEFAULT',
-                            ProgramSelection: 1
-                        }
-                    },
-                    VideoSelector: {
-                        ColorSpace: 'FOLLOW',
-                        Rotate: event.inputRotate
-                    },
-                    FilterEnable: 'AUTO',
-                    PsiControl: 'USE_PSI',
-                    FilterStrength: 0,
-                    DeblockFilter: 'DISABLED',
-                    DenoiseFilter: 'DISABLED',
-                    TimecodeSource: 'EMBEDDED',
-                    FileInput: inputPath,
-                }],
-                OutputGroups: []
-            }
-        };
+        let job = getBaseJobSettings();
+
+        job.Role = process.env.MediaConvertRole;
+        job.UserMetadata = { guid: event.guid, workflow: event.workflowName };
+
+        if(event.srcVideo){
+            let inputPathVideo = `s3://${event.srcBucket}/${event.srcVideo}`;
+            job.Settings.Inputs[0].FileInput = inputPathVideo;
+
+            job.Settings.Inputs[0].VideoSelector = {
+                ColorSpace: 'FOLLOW',
+                Rotate: 'DEGREE_0'
+            };
+        }
+
+        if(event.srcExternalAudio){
+            let inputPathAudio = `s3://${event.srcBucket}/${event.srcExternalAudio}`;
+
+            job.Settings.Inputs[0].AudioSelectors = {
+                'Audio Selector 1': {
+                    Offset: 0,
+                    DefaultSelection: 'DEFAULT',
+                    ProgramSelection: 1,
+                    ExternalAudioFileInput: inputPathAudio
+                }
+            };
+        }
 
         if(event.jobTemplate.type === "custom") {
             const jobtemplate = await s3.getObject({ Bucket: event.tmplBucket, Key: event.jobTemplate.name }).promise();
             let usr_tmpl = JSON.parse(jobtemplate.Body);
+
+            console.log(`USER_TEMPLATE:: ${JSON.stringify(usr_tmpl, null, 2)}`);
+
             tmpl = getCustomTmpl(usr_tmpl);
             isCustomTemplate = true;
         }
@@ -410,11 +498,12 @@ exports.handler = async (event) => {
 
             if (found) {
                 console.log(`${group.Name} found in Job Template`);
-
                 const outputGroup = applySettingsIfNeeded(isCustomTemplate, defaultGroup, group);
+
                 job.Settings.OutputGroups.push(outputGroup);
             }
         });
+
         
 
         //if enabled the TimeCodeConfig needs to be set to ZEROBASED not passthrough
